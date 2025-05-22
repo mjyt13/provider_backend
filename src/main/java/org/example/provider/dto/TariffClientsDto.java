@@ -1,0 +1,10 @@
+package org.example.provider.dto;
+
+import java.util.List;
+// JSON 2, понадобится на странице тарифа
+public record TariffClientsDto(
+        Long tariffId,
+        String tariffName,
+        String tariffType,
+        List<ClientInfoDto> clients
+) {}
