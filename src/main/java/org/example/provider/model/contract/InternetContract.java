@@ -6,7 +6,7 @@ import org.example.provider.model.tariff.InternetTariff;
 @Table(name="\"Internet_Contract\"",schema = "communication")
 public class InternetContract extends Contract{
     @ManyToOne
-    @JoinColumn(name = "Internet_Tariff_id")
+    @JoinColumn(name = "\"Internet_Tariff_id\"")
     private InternetTariff tariff;
 
     public InternetTariff getTariff() {

@@ -8,7 +8,7 @@ public abstract class Tariff {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "cost",columnDefinition = "MONEY")
+    @Column(name = "cost",precision = 19, scale = 2)
     private BigDecimal cost;
 
     private String description;

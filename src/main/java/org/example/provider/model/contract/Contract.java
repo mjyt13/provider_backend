@@ -11,7 +11,7 @@ public abstract class Contract {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "debt",columnDefinition = "MONEY")
+    @Column(name = "debt",precision = 19, scale = 2)
     private BigDecimal debt;
 
     @Column(name = "expiration_date")

@@ -6,7 +6,7 @@ import org.example.provider.model.tariff.TelephonyTariff;
 @Table(name="\"Telephony_Contract\"",schema = "communication")
 public class TelephonyContract extends Contract {
     @ManyToOne
-    @JoinColumn(name = "Telephony_Tariff_id")
+    @JoinColumn(name = "\"Telephony_Tariff_id\"")
     private TelephonyTariff tariff;
 
     public TelephonyTariff getTariff() {

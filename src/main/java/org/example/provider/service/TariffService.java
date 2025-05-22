@@ -3,6 +3,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.persistence.Tuple;
 import org.example.provider.dto.ClientInfoDto;
 import org.example.provider.dto.TariffClientsDto;
 import org.example.provider.dto.TariffInfoDto;
@@ -34,12 +35,60 @@ public class TariffService {
     }
 
     public List<TariffInfoDto> getAllTariffsInfo(){
-        List<TariffInfoDto> telephonyTariffs = telephonyTariffRepository.findAllTariffClients();
-        List<TariffInfoDto> internetTariffs = internetTariffRepository.findAllTariffClients();
+        List<TariffInfoDto> telephonyTariffs = telephonyTariffRepository.findAllTariffClients().stream()
+                .map(p -> new TariffInfoDto(
+                        p.getId(),
+                        p.getType(),
+                        p.getName(),
+                        p.getCost(),
+                        p.getDescription(),
+                        p.getClientCount()))
+                .toList();
+        List<TariffInfoDto> internetTariffs = internetTariffRepository.findAllTariffClients().stream()
+                .map(p -> new TariffInfoDto(
+                        p.getId(),
+                        p.getType(),
+                        p.getName(),
+                        p.getCost(),
+                        p.getDescription(),
+                        p.getClientCount()))
+                .toList();
         List<TariffInfoDto> allTariffs = new ArrayList<>();
         allTariffs.addAll(telephonyTariffs);
         allTariffs.addAll(internetTariffs);
+        System.out.println("а мы в тарифах");
         return allTariffs;
+    }
+
+    public List<TariffInfoDto> getTariffsByType(String serviceType){
+        switch (serviceType.toLowerCase()){
+            case "telephony" ->{
+                System.out.println("телефония тарифы здесь?");
+                List<TariffInfoDto> telephonyTariffs = telephonyTariffRepository.findAllTariffClients().stream()
+                        .map(p -> new TariffInfoDto(
+                                p.getId(),
+                                p.getType(),
+                                p.getName(),
+                                p.getCost(),
+                                p.getDescription(),
+                                p.getClientCount()))
+                        .toList();
+                return telephonyTariffs;
+            }
+            case "internet" -> {
+                List<TariffInfoDto> internetTariffs = internetTariffRepository.findAllTariffClients().stream()
+                        .map(p -> new TariffInfoDto(
+                                p.getId(),
+                                p.getType(),
+                                p.getName(),
+                                p.getCost(),
+                                p.getDescription(),
+                                p.getClientCount()))
+                        .toList();
+                return internetTariffs;
+            }
+            default -> throw new IllegalArgumentException("Специально для тарифов исключение");
+        }
     }
 
     public TariffClientsDto getTariffClients(Long tariffId, String tariffType){
@@ -59,7 +108,7 @@ public class TariffService {
                 List<ClientInfoDto> clients = internetContractRepository.findClientsByTariffId(tariffId);
                 yield new TariffClientsDto(tariff.getId(),tariff.getName(),"internet",clients);
             }
-            default -> throw new IllegalArgumentException("Unknown Tariff type");
+            default -> throw new IllegalArgumentException("а это тарифы");
         };
     }
 }
