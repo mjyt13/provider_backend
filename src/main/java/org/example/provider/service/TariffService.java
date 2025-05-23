@@ -6,6 +6,7 @@ import jakarta.persistence.EntityNotFoundException;
 import jakarta.persistence.Tuple;
 import org.example.provider.dto.ClientInfoDto;
 import org.example.provider.dto.TariffClientsDto;
+import org.example.provider.dto.TariffClientsProjection;
 import org.example.provider.dto.TariffInfoDto;
 import org.example.provider.model.tariff.InternetTariff;
 import org.example.provider.model.tariff.TelephonyTariff;
@@ -63,7 +64,6 @@ public class TariffService {
     public List<TariffInfoDto> getTariffsByType(String serviceType){
         switch (serviceType.toLowerCase()){
             case "telephony" ->{
-                System.out.println("телефония тарифы здесь?");
                 List<TariffInfoDto> telephonyTariffs = telephonyTariffRepository.findAllTariffClients().stream()
                         .map(p -> new TariffInfoDto(
                                 p.getId(),
@@ -91,25 +91,41 @@ public class TariffService {
         }
     }
 
-    public TariffClientsDto getTariffClients(Long tariffId, String tariffType){
-        return switch (tariffType.toLowerCase()) {
+    public TariffClientsDto getTariffClients(String tariffName, String serviceType){
+        List<TariffClientsProjection> projections = new ArrayList<>();
+        switch (serviceType.toLowerCase()) {
             case "telephony" -> {
-                TelephonyTariff tariff =
-                    telephonyTariffRepository.findByIdWithContracts(tariffId).
-                            orElseThrow(
-                            ()-> new EntityNotFoundException("Telephony Tariff not found"));
-                List<ClientInfoDto> clients = telephonyContractRepository.findClientsByTariffId(tariffId);
-                yield new TariffClientsDto(tariff.getId(),tariff.getName(),"telephony",clients);
+                System.out.println("получение тарифа телефонии");
+                projections = telephonyTariffRepository.findClientsByTariffName(tariffName);
             }
             case "internet" -> {
-                InternetTariff tariff =
-                    internetTariffRepository.findByIdWithContracts(tariffId).orElseThrow(
-                            ()->new EntityNotFoundException("Internet Tariff not found"));
-                List<ClientInfoDto> clients = internetContractRepository.findClientsByTariffId(tariffId);
-                yield new TariffClientsDto(tariff.getId(),tariff.getName(),"internet",clients);
+                System.out.println("получение тарифа интернета");
+                projections = internetTariffRepository.findClientsByTariffName(tariffName);
             }
             default -> throw new IllegalArgumentException("а это тарифы");
-        };
+        }
+        System.out.println("тариф получен");
+        if(projections.isEmpty()) {
+            throw new EntityNotFoundException("Tariff not found with name: "+tariffName);
+        }
+        TariffClientsProjection first = projections.get(0);
+        List<ClientInfoDto> clients = projections.stream().map(
+                p -> new ClientInfoDto(
+                        p.getClientId(),
+                        p.getClientName(),
+                        p.getDebt(),
+                        p.getExpirationDate(),
+                        p.getSignupDate()
+                )
+        ).toList();
+        return new TariffClientsDto(
+                first.getTariffId(),
+                first.getTariffName(),
+                first.getTariffType(),
+                first.getTariffDescription(),
+                clients
+        );
+
     }
 }
 

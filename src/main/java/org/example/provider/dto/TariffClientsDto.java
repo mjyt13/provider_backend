@@ -6,5 +6,6 @@ public record TariffClientsDto(
         Long tariffId,
         String tariffName,
         String tariffType,
+        String tariffDescription,
         List<ClientInfoDto> clients
 ) {}

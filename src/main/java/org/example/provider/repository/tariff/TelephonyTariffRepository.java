@@ -1,27 +1,37 @@
 package org.example.provider.repository.tariff;
 
+import org.example.provider.dto.TariffClientsProjection;
 import org.example.provider.dto.TariffInfoDto;
+import org.example.provider.dto.TariffInfoProjection;
 import org.example.provider.model.tariff.TelephonyTariff;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
 public interface TelephonyTariffRepository extends  JpaRepository<TelephonyTariff, Long>{
-    @Query("SELECT t FROM TelephonyTariff t JOIN FETCH t.contracts WHERE t.id = :id")
-    Optional<TelephonyTariff> findByIdWithContracts(@Param("id") Long id);
 
-    public interface TariffInfoProjection {
-        Long getId();
-        String getType();
-        String getName();
-        BigDecimal getCost();
-        String getDescription();
-        Integer getClientCount();
-    }
+    @Query(value = """
+    SELECT 
+        t.id as tariffId,
+        t.name as tariffName,
+        'telephony' as tariffType,
+        t.description as tariffDescription,
+        c."Client_id" as clientId,
+        cl.name as clientName,
+        c.debt as debt,
+        c.expiration_date as expirationDate,
+        cl.signup_date as signupDate
+        FROM communication."Telephony_Tariff" t
+        JOIN communication."Telephony_Contract" c ON t.id = c."Telephony_Tariff_id"
+        JOIN communication."Client" cl ON c."Client_id" = cl.id
+        WHERE t.name = :tariffName""",
+            nativeQuery = true)
+    List<TariffClientsProjection> findClientsByTariffName(@Param("tariffName") String tariffName);
 
     @Query(value = """
         SELECT

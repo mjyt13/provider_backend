@@ -21,9 +21,7 @@ public class TariffController {
     // 0. все тарифы
     @GetMapping("/tariffs")
     public ResponseEntity<List<TariffInfoDto>> getAllTariffs(){
-        System.out.println("пытаемся получить все тарифы");
         List<TariffInfoDto> tariffs = tariffService.getAllTariffsInfo();
-        System.out.println("тарифы получились");
         return ResponseEntity.ok(tariffs);
     }
 
@@ -31,19 +29,17 @@ public class TariffController {
     @GetMapping("/{serviceType}/tariffs")
     public ResponseEntity<List<TariffInfoDto>> getTarifffsByType(
             @PathVariable String serviceType){
-        System.out.println("пытаемся получить конкретные тарифы");
         List<TariffInfoDto> dtos = tariffService.getTariffsByType(serviceType);
-        System.out.println("получили, дай пять чувак");
         return ResponseEntity.ok(dtos);
     }
 
-    // 2. список тарифов данной услуги
-    @GetMapping("/{serviceType}/tariffs/{tariffId}/clients")
+    // 2. список клиентов данного тарифа
+    @GetMapping("/{serviceType}/tariffs/{tariffName}/clients")
     public ResponseEntity<TariffClientsDto> getTariffClients(
-            @PathVariable Long tariffId,
-            @RequestParam String type
+            @PathVariable String serviceType,
+            @PathVariable String tariffName
     ){
-        TariffClientsDto dto = tariffService.getTariffClients(tariffId,type);
+        TariffClientsDto dto = tariffService.getTariffClients(tariffName,serviceType);
         return ResponseEntity.ok(dto);
     }
 
