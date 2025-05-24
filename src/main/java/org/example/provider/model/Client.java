@@ -15,7 +15,7 @@ public class Client {
     private Long id;
 
     private String name;
-//    private String address;
+    private String address;
     private String details;
 
     @Column(name="signup_date")
@@ -58,5 +58,29 @@ public class Client {
 
     public void setSignupDate(LocalDate signupDate) {
         this.signupDate = signupDate;
+    }
+
+    public String getAddress() {
+        return address;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
+    }
+
+    public List<TelephonyContract> getTelephonyContracts() {
+        return telephonyContracts;
+    }
+
+    public void setTelephonyContracts(List<TelephonyContract> telephonyContracts) {
+        this.telephonyContracts = telephonyContracts;
+    }
+
+    public List<InternetContract> getInternetContracts() {
+        return internetContracts;
+    }
+
+    public void setInternetContracts(List<InternetContract> internetContracts) {
+        this.internetContracts = internetContracts;
     }
 }

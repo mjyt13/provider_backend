@@ -18,8 +18,8 @@ public abstract class Contract {
     private LocalDate expirationDate;
 
     @ManyToOne
-    @JoinColumn(name = "Client_id")
-    protected Client client;
+    @JoinColumn(name = "\"Client_id\"")
+    private Client client;
 
     public Long getId() {
         return id;
@@ -43,5 +43,13 @@ public abstract class Contract {
 
     public void setExpirationDate(LocalDate expirationDate) {
         this.expirationDate = expirationDate;
+    }
+
+    public Client getClient() {
+        return client;
+    }
+
+    public void setClient(Client client) {
+        this.client = client;
     }
 }

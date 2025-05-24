@@ -1,42 +1,32 @@
 package org.example.provider.service;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
+
 import jakarta.persistence.EntityNotFoundException;
-import jakarta.persistence.Tuple;
-import org.example.provider.dto.ClientInfoDto;
-import org.example.provider.dto.TariffClientsDto;
-import org.example.provider.dto.TariffClientsProjection;
-import org.example.provider.dto.TariffInfoDto;
+import jakarta.transaction.Transactional;
+import org.example.provider.dto.*;
 import org.example.provider.model.tariff.InternetTariff;
 import org.example.provider.model.tariff.TelephonyTariff;
-import org.example.provider.repository.contract.InternetContractRepository;
-import org.example.provider.repository.contract.TelephonyContractRepository;
 import org.example.provider.repository.tariff.InternetTariffRepository;
 import org.example.provider.repository.tariff.TelephonyTariffRepository;
 import org.springframework.stereotype.Service;
 
 @Service
 public class TariffService {
-    private final TelephonyTariffRepository telephonyTariffRepository;
-    private final InternetTariffRepository internetTariffRepository;
-    private final TelephonyContractRepository telephonyContractRepository;
-    private final InternetContractRepository internetContractRepository;
+    private final TelephonyTariffRepository telephonyTariffRepo;
+    private final InternetTariffRepository internetTariffRepo;
 
     public TariffService(
             TelephonyTariffRepository telephonyTariffRepository,
-            InternetTariffRepository internetTariffRepository,
-            TelephonyContractRepository telephonyContractRepository,
-            InternetContractRepository internetContractRepository
+            InternetTariffRepository internetTariffRepository
     ){
-        this.internetContractRepository = internetContractRepository;
-        this.internetTariffRepository = internetTariffRepository;
-        this.telephonyContractRepository = telephonyContractRepository;
-        this.telephonyTariffRepository = telephonyTariffRepository;
+
+        this.internetTariffRepo = internetTariffRepository;
+        this.telephonyTariffRepo = telephonyTariffRepository;
     }
 
     public List<TariffInfoDto> getAllTariffsInfo(){
-        List<TariffInfoDto> telephonyTariffs = telephonyTariffRepository.findAllTariffClients().stream()
+        List<TariffInfoDto> telephonyTariffs = telephonyTariffRepo.findAllTariffClients().stream()
                 .map(p -> new TariffInfoDto(
                         p.getId(),
                         p.getType(),
@@ -45,7 +35,7 @@ public class TariffService {
                         p.getDescription(),
                         p.getClientCount()))
                 .toList();
-        List<TariffInfoDto> internetTariffs = internetTariffRepository.findAllTariffClients().stream()
+        List<TariffInfoDto> internetTariffs = internetTariffRepo.findAllTariffClients().stream()
                 .map(p -> new TariffInfoDto(
                         p.getId(),
                         p.getType(),
@@ -64,7 +54,7 @@ public class TariffService {
     public List<TariffInfoDto> getTariffsByType(String serviceType){
         switch (serviceType.toLowerCase()){
             case "telephony" ->{
-                List<TariffInfoDto> telephonyTariffs = telephonyTariffRepository.findAllTariffClients().stream()
+                List<TariffInfoDto> telephonyTariffs = telephonyTariffRepo.findAllTariffClients().stream()
                         .map(p -> new TariffInfoDto(
                                 p.getId(),
                                 p.getType(),
@@ -76,7 +66,7 @@ public class TariffService {
                 return telephonyTariffs;
             }
             case "internet" -> {
-                List<TariffInfoDto> internetTariffs = internetTariffRepository.findAllTariffClients().stream()
+                List<TariffInfoDto> internetTariffs = internetTariffRepo.findAllTariffClients().stream()
                         .map(p -> new TariffInfoDto(
                                 p.getId(),
                                 p.getType(),
@@ -96,11 +86,11 @@ public class TariffService {
         switch (serviceType.toLowerCase()) {
             case "telephony" -> {
                 System.out.println("получение тарифа телефонии");
-                projections = telephonyTariffRepository.findClientsByTariffName(tariffName);
+                projections = telephonyTariffRepo.findClientsByTariffName(tariffName);
             }
             case "internet" -> {
                 System.out.println("получение тарифа интернета");
-                projections = internetTariffRepository.findClientsByTariffName(tariffName);
+                projections = internetTariffRepo.findClientsByTariffName(tariffName);
             }
             default -> throw new IllegalArgumentException("а это тарифы");
         }
@@ -126,6 +116,54 @@ public class TariffService {
                 clients
         );
 
+    }
+
+    public Object getTariffById(Long id, String serviceType){
+        return switch (serviceType.toLowerCase()){
+            case "internet" -> internetTariffRepo.findById(id)
+                    .orElseThrow(()-> new EntityNotFoundException("Internet tariff not found"));
+            case "telephony" -> telephonyTariffRepo.findById(id)
+                    .orElseThrow(() -> new EntityNotFoundException("Telephony tariff not found"));
+            default -> throw new IllegalArgumentException("Unknown tariff type: " + serviceType);
+        };
+    }
+    public Object createTariff(TariffDto dto, String tariffType){
+        return switch (tariffType.toLowerCase()) {
+            case "internet" -> {
+                InternetTariff tariff = new InternetTariff();
+                tariff.setName(dto.name());
+                tariff.setCost(dto.cost());
+                tariff.setDescription(dto.description());
+                yield internetTariffRepo.save(tariff);
+            }
+            case "telephony" -> {
+                TelephonyTariff tariff = new TelephonyTariff();
+                tariff.setName(dto.name());
+                tariff.setCost(dto.cost());
+                tariff.setDescription(dto.description());
+                yield telephonyTariffRepo.save(tariff);
+            }
+            default -> throw new IllegalArgumentException("Unknown tariff type: " + tariffType);
+        };
+    }
+    @Transactional
+    public void deleteTariff(Long id, String tariffType) {
+        switch (tariffType.toLowerCase()) {
+            case "internet":
+                InternetTariff internetTariff = internetTariffRepo.findById(id)
+                        .orElseThrow(() -> new EntityNotFoundException("Internet tariff not found"));
+
+                internetTariffRepo.delete(internetTariff);
+                break;
+
+            case "telephony":
+                TelephonyTariff  telephonyTariff = telephonyTariffRepo.findById(id)
+                        .orElseThrow(() -> new EntityNotFoundException("Internet tariff not found"));
+                telephonyTariffRepo.delete(telephonyTariff);
+                break;
+            default:
+                throw new IllegalArgumentException("Invalid tariff type");
+        }
     }
 }
 
