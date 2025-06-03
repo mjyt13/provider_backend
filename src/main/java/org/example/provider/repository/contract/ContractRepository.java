@@ -1,8 +1,6 @@
 package org.example.provider.repository.contract;
 
 import org.example.provider.dto.ClientInfoDto;
-import org.example.provider.model.contract.Contract;
-import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.NoRepositoryBean;
 import org.springframework.data.repository.query.Param;

@@ -12,6 +12,7 @@ import java.math.BigDecimal;
 import java.net.URI;
 import java.time.LocalDate;
 
+@CrossOrigin(origins = "http://localhost:5173")
 @RestController
 @RequestMapping("/api/contracts")
 public class ContractController {

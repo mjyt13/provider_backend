@@ -21,7 +21,10 @@ public class ContractService {
     private final ClientRepository clientRepo;
     private final TariffService tariffService;
 
-    public ContractService(InternetContractRepository internetContractRepo, TelephonyContractRepository telephonyContractRepo, ClientRepository clientRepo, TariffService tariffService) {
+    public ContractService(InternetContractRepository internetContractRepo,
+                           TelephonyContractRepository telephonyContractRepo,
+                           ClientRepository clientRepo,
+                           TariffService tariffService) {
         this.internetContractRepo = internetContractRepo;
         this.telephonyContractRepo = telephonyContractRepo;
         this.clientRepo = clientRepo;

@@ -1,6 +1,7 @@
 package org.example.provider.service;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
@@ -9,20 +10,28 @@ import org.example.provider.model.tariff.InternetTariff;
 import org.example.provider.model.tariff.TelephonyTariff;
 import org.example.provider.repository.tariff.InternetTariffRepository;
 import org.example.provider.repository.tariff.TelephonyTariffRepository;
+import org.example.provider.repository.view.InternetContractViewRepository;
+import org.example.provider.repository.view.TelephonyContractViewRepository;
 import org.springframework.stereotype.Service;
 
 @Service
 public class TariffService {
     private final TelephonyTariffRepository telephonyTariffRepo;
     private final InternetTariffRepository internetTariffRepo;
+    private final InternetContractViewRepository internetRepo;
+    private final TelephonyContractViewRepository telephonyRepo;
 
     public TariffService(
-            TelephonyTariffRepository telephonyTariffRepository,
-            InternetTariffRepository internetTariffRepository
+            TelephonyTariffRepository telephonyTariffRepo,
+            InternetTariffRepository internetTariffRepo,
+            InternetContractViewRepository internetRepo,
+            TelephonyContractViewRepository telephonyRepo
     ){
 
-        this.internetTariffRepo = internetTariffRepository;
-        this.telephonyTariffRepo = telephonyTariffRepository;
+        this.internetTariffRepo = internetTariffRepo;
+        this.telephonyTariffRepo = telephonyTariffRepo;
+        this.internetRepo = internetRepo;
+        this.telephonyRepo = telephonyRepo;
     }
 
     public List<TariffInfoDto> getAllTariffsInfo(){
@@ -81,8 +90,10 @@ public class TariffService {
         }
     }
 
+    // получить клиентов тарифа. пользуется фронтом при создании страниц.
     public TariffClientsDto getTariffClients(String tariffName, String serviceType){
-        List<TariffClientsProjection> projections = new ArrayList<>();
+
+        List<TariffClientsProjection> projections;
         switch (serviceType.toLowerCase()) {
             case "telephony" -> {
                 System.out.println("получение тарифа телефонии");
@@ -115,7 +126,24 @@ public class TariffService {
                 first.getTariffDescription(),
                 clients
         );
+        /*
+        TariffInfoProjection tariff;
+        List<ClientInfoDto> clients;
+        switch (serviceType.toLowerCase()){
+            case "internet" -> {
+                tariff = internetTariffRepo.findTariffByName(tariffName);
+                clients = internetRepo.findByTariffName(tariffName).stream()
+                        .map(c -> new ClientInfoDto(c.getClient(), c.getDebt(), c.getExp_date())).toList();
+            }
+            case "telephony" -> {
+                tariff = telephonyTariffRepo.findTariffByName(tariffName);
+                clients = telephonyRepo.findByTariffName(tariffName).stream()
+                        .map(c -> new ClientInfoDto(c.getClient(), c.getDebt(), c.getExp_date())).toList();
+            }
+            default -> throw new IllegalArgumentException("Неизвестный тип услуги "+tariffName);
+        }
 
+        return new TariffClientsDto(tariff.getId(),tariffName,tariff.getType(),tariff.getDescription(),clients);*/
     }
 
     public Object getTariffById(Long id, String serviceType){
